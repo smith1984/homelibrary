@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core">
+<h:head>
+    <title>#{msgs.page_add_book}</title>
+
+    <script type="text/javascript">
+        function handleCompletePublisher(xhr, status, args) {
+            PF('dlgAddPublisher').hide();
+        }
+    </script>
+    <script type="text/javascript">
+        function handleCompleteSeries(xhr, status, args) {
+            PF('dlgAddSerie').hide();
+        }
+    </script>
+</h:head>
+<style type="text/css">
+    .body {
+        background-color: #15d6ff;
+    }
+
+    .dataGrid .ui-widget-content {
+        background-color: #0bb6ff;
+    }
+
+    .panelBook .ui-widget-content {
+        background-color: #15d6ff;
+        text-align: center;
+    }
+
+    .panelGrid {
+        width: 100%;
+    }
+
+    .colLeft {
+        padding-right: 5px;
+        text-align: right;
+        font-style: italic;
+    }
+
+    .colRight {
+        padding-left: 5px;
+        text-align: left;
+        font-style: normal;
+    }
+
+    .panelAddBook {
+        background-color: #0bb6ff;
+        text-align: center;
+    }
+</style>
+<h:body styleClass="body">
+
+    <p:panel header="#{msgs.new_book}" styleClass="panelBook">
+        <h:form id="addBook">
+            <p:growl id="msgs" showDetail="true" skipDetailIfEqualsSummary="true"/>
+
+            <h:panelGrid columns="2" styleClass="panelGrid" cellpadding="5" columnClasses="colLeft, colRight">
+                <h:outputText value="#{msgs.book_title}"/>
+                <p:inputText value="#{addBook.bookTitle}" required="true"
+                             requiredMessage="#{msgs.empty_field_book_title}"/>
+                <h:outputText value="#{msgs.book_count_pages}"/>
+                <p:inputText value="#{addBook.countPages}" required="true"
+                             requiredMessage="#{msgs.empty_field_book_count_pages}"/>
+                <h:outputText value="#{msgs.book_publishing_year}"/>
+                <p:inputText value="#{addBook.yearPublishing}" required="true"
+                             requiredMessage="#{msgs.empty_field_book_year_publishing}"/>
+                <h:outputText value="#{msgs.book_publisher}"/>
+                <p:autoComplete id="acPublisher" value="#{addPublisher.namePublisher}" required="true"
+                                requiredMessage="#{msgs.empty_field_book_publisher}"
+                                completeMethod="#{addPublisher.completePublisher}">
+                    <p:ajax event="blur" listener="#{addPublisher.onBlur}" update="dialogAddPublisher"/>
+                </p:autoComplete>
+                <h:outputText value="#{msgs.book_serie}"/>
+                <p:autoComplete id="acSerie" value="#{addSerie.nameSerie}" required="true"
+                                requiredMessage="#{msgs.empty_field_book_serie}"
+                                completeMethod="#{addSerie.completeSerie(addPublisher.publisher, addSerie.nameSerie)}">
+                    <p:ajax event="blur" listener="#{addSerie.onBlur(addPublisher.publisher)}" update="dialogAddSerie"/>
+                </p:autoComplete>
+                <h:outputText/>
+                <p:commandButton id="addBookBtn" value="#{msgs.btn_add_book}" action="#{addBook.addBook}"
+                                 update="addBook"/>
+                <h:outputText/>
+                <h:form id="cancel">
+                    <h:outputText/>
+                    <p:linkButton id="cancelBtn" value="#{msgs.btn_cancel}" outcome="/library?faces-redirect=true"/>
+                </h:form>
+            </h:panelGrid>
+        </h:form>
+    </p:panel>
+    <p:dialog id="dialogAddPublisher" header="#{msgs.dlg_add_publisher}" widgetVar="dlgAddPublisher"
+              styleClass="panelBook" dynamic="true"
+              resizable="false" modal="true" closable="false">
+        <h:form id="addPublisher">
+            <p:growl id="msgsAddPublisher" showDetail="true" skipDetailIfEqualsSummary="true"/>
+            <h:panelGrid columns="2" styleClass="panelGrid" cellpadding="5" columnClasses="colLeft, colRight">
+                <h:outputText value="#{msgs.publisher_name}"/>
+                <p:inputText value="#{addPublisher.namePublisher}" required="true"
+                             requiredMessage="#{msgs.empty_field_publisher_name}"/>
+
+                <h:outputText value="#{msgs.publisher_city}"/>
+                <p:inputText value="#{addPublisher.cityPublisher}" required="true"
+                             requiredMessage="#{msgs.empty_field_publisher_city}"/>
+
+                <h:outputText/>
+                <p:commandButton id="addPublisherBtn" value="#{msgs.btn_add_publisher}"
+                                 action="#{addPublisher.add}" update="msgsAddPublisher"
+                                 oncomplete="handleCompletePublisher(xhr, status, args)"/>
+                <h:outputText/>
+                <h:form id="cancelAddPublisher">
+                    <h:outputText/>
+                    <p:linkButton id="cancelBtnAddPublisher" value="#{msgs.btn_cancel}"
+                                  oncomplete="handleCompletePublisher(xhr, status, args)"/>
+                </h:form>
+            </h:panelGrid>
+        </h:form>
+    </p:dialog>
+
+    <p:dialog id="dialogAddSerie" header="#{msgs.dlg_add_serie}" widgetVar="dlgAddSerie"
+              styleClass="panelBook" dynamic="true"
+              resizable="false" modal="true" closable="false">
+        <h:form id="addSerie">
+            <p:growl id="msgsAddSerie" showDetail="true" skipDetailIfEqualsSummary="true"/>
+            <h:panelGrid columns="2" styleClass="panelGrid" cellpadding="5" columnClasses="colLeft, colRight">
+                <h:outputText value="#{msgs.book_series}"/>
+                <p:inputText value="#{addSerie.nameSerie}" required="true"
+                             requiredMessage="#{msgs.empty_field_book_serie}"/>
+
+                <h:outputText/>
+                <p:commandButton id="addSerieBtn" value="#{msgs.btn_add_serie}"
+                                 action="#{addSerie.add(addPublisher.publisher)}" update="msgsAddSerie"
+                                 oncomplete="handleCompleteSeries(xhr, status, args)"/>
+                <h:outputText/>
+                <h:form id="cancelAddSerie">
+                    <h:outputText/>
+                    <p:linkButton id="cancelBtnAddSerie" value="#{msgs.btn_cancel}"
+                                  oncomplete="handleCompleteSeries(xhr, status, args)"/>
+                </h:form>
+            </h:panelGrid>
+        </h:form>
+    </p:dialog>
+</h:body>
+</html>
