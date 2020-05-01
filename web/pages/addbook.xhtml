@@ -62,7 +62,7 @@
         <h:form id="addBook">
             <p:growl id="msgs" showDetail="true" skipDetailIfEqualsSummary="true"/>
 
-            <h:panelGrid columns="2" styleClass="panelGrid" cellpadding="5" columnClasses="colLeft, colRight">
+            <h:panelGrid columns="2" styleClass="panelGrid" cellpadding="6" columnClasses="colLeft, colRight">
                 <h:outputText value="#{msgs.book_title}"/>
                 <p:inputText value="#{addBook.bookTitle}" required="true"
                              requiredMessage="#{msgs.empty_field_book_title}"/>
@@ -78,7 +78,9 @@
                                 completeMethod="#{addPublisher.completePublisher}">
                     <p:ajax event="blur" listener="#{addPublisher.onBlur}" update="dialogAddPublisher"/>
                 </p:autoComplete>
-                <h:outputText value="#{msgs.book_serie}"/>
+                <h:outputText value="#{msgs.book_stories}:"/>
+                <p:commandButton id="addStorieBtn" value="#{msgs.btn_add_storie}" action="PF('dlgAddStorie').show()"/>
+                <h:outputText value="#{msgs.book_series}"/>
                 <p:autoComplete id="acSerie" value="#{addSerie.nameSerie}" required="true"
                                 requiredMessage="#{msgs.empty_field_book_serie}"
                                 completeMethod="#{addSerie.completeSerie(addPublisher.publisher, addSerie.nameSerie)}">
@@ -145,6 +147,10 @@
                 </h:form>
             </h:panelGrid>
         </h:form>
+    </p:dialog>
+    <p:dialog id="dialogAddStorie" header="#{msgs.dlg_add_serie}" widgetVar="dlgAddStorie"
+              styleClass="panelBook" dynamic="true"
+              resizable="false" modal="true" closable="true">
     </p:dialog>
 </h:body>
 </html>
