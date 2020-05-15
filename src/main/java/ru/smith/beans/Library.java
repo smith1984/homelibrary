@@ -8,6 +8,7 @@ import ru.smith.models.Author;
 import ru.smith.models.Book;
 import ru.smith.models.Story;
 import ru.smith.services.EntityService;
+import ru.smith.utils.StringCreate;
 
 import javax.faces.view.ViewScoped;
 import javax.annotation.PostConstruct;
@@ -45,23 +46,10 @@ public class Library implements Serializable {
         for (Story story : book.getStories()) {
             uniqueAuthors.addAll(story.getAuthors());
         }
-        return createStrAuthors(new ArrayList<>(uniqueAuthors));
+        return StringCreate.createStrAuthors(new ArrayList<>(uniqueAuthors), ", ");
     }
-
     public String getAllAuthorsForStory(Story story) {
-        return createStrAuthors(story.getAuthors());
+        return StringCreate.createStrAuthors(story.getAuthors(), ", ");
     }
 
-    private String createStrAuthors(List<Author> authors) {
-        StringBuilder allAuthors = new StringBuilder();
-        for (Author author : authors) {
-            String fio = author.getLastName() + " " +
-                    (author.getFirstName() != null ?
-                            (author.getFirstName().substring(0, 1).toUpperCase() + ". ") : "") +
-                    (author.getMiddleName() != null ? (
-                            author.getMiddleName().substring(0, 1).toUpperCase() + ". ") : "") + ", ";
-            allAuthors.append(fio);
-        }
-        return allAuthors.substring(0, allAuthors.length() - 2);
-    }
 }

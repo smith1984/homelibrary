@@ -36,15 +36,12 @@ public class AddPublisher implements Serializable {
     @ru.smith.annotations.EntityService(Entities.PUBLISHER)
     private EntityService publisherService;
 
-    public List<String> completePublisher(String namePublisher) {
-        String namePublisherLowerCase = namePublisher.toLowerCase();
-        List<Publisher> publishers =
-                (List<Publisher>) publisherService.findAll();
-        return publishers.stream().filter(p -> p.getName().toLowerCase().contains(namePublisherLowerCase))
+    public List<String> completePublisher(String query) {
+        return  ((List<Publisher>)publisherService.findAll()).stream().filter(p -> p.getName().toLowerCase().contains(query.toLowerCase()))
                 .map(Publisher::getName).collect(Collectors.toList());
     }
 
-    public void onBlur() {
+    public Publisher onBlur() {
         List<Publisher> publishers =
                 (List<Publisher>) publisherService.findWithCondition("name = '" + namePublisher + "'");
         if (!publishers.isEmpty()) {
@@ -52,12 +49,14 @@ public class AddPublisher implements Serializable {
         } else {
             PrimeFaces.current().executeScript("PF('dlgAddPublisher').show()");
         }
+        return publisher;
     }
 
-    public void add(){
+    public Publisher add(){
         publisher = new Publisher();
         publisher.setName(namePublisher);
         publisher.setCity(cityPublisher);
         publisherService.saveEntity(publisher);
+        return publisher;
     }
 }

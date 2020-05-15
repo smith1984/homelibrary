@@ -26,7 +26,7 @@ public class Story implements Entity{
     @Getter @Setter
     private List<Book> books;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "story_author", schema = "library", joinColumns = @JoinColumn(name = "story_id"),
             inverseJoinColumns = @JoinColumn(name = "author_id"))
     @Getter @Setter

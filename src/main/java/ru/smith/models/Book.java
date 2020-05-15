@@ -38,7 +38,7 @@ public class Book implements Entity {
     @Getter @Setter
     private Series series;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "story_book", schema = "library", joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "story_id"))
     @Getter @Setter

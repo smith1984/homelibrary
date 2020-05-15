@@ -4,6 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import ru.smith.models.Entity;
 import ru.smith.utils.HibernateSessionFactoryUtil;
+
 import java.util.List;
 
 public class EntityDaoHibernate implements EntityDao {
@@ -34,17 +35,41 @@ public class EntityDaoHibernate implements EntityDao {
     }
 
     public List<Entity> findAll(String nameEntity) {
-        return HibernateSessionFactoryUtil.
-                getSessionFactory().openSession().createQuery("From " + nameEntity).list();
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        List<Entity> list = null;
+        try{
+        list = session.createQuery("From " + nameEntity).list();}
+        catch(Exception e){e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
+        return list;
     }
 
     public List<Entity> findAllWithDetail(String nameEntity, String condition) {
-
-        return HibernateSessionFactoryUtil.
-                getSessionFactory().openSession().createQuery("From " + nameEntity + " where " + condition).list();
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        List<Entity> list = null;
+        try{
+            list = session.createQuery("From " + nameEntity + " where " + condition).list();}
+        catch(Exception e){e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
+        return list;
     }
 
     public Entity findById(int id) {
-        return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(classEntity, id);
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Entity entity = null;
+        try{
+            entity = session.get(classEntity, id);}
+        catch(Exception e){e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
+        return entity;
     }
 }

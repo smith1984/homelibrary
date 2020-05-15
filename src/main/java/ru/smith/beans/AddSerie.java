@@ -9,6 +9,8 @@ import ru.smith.models.Publisher;
 import ru.smith.models.Series;
 import ru.smith.services.EntityService;
 
+import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,35 +31,37 @@ public class AddSerie implements Serializable {
     @Getter
     private Series serie;
 
+
     @Inject
     @ru.smith.annotations.EntityService(Entities.SERIES)
     private EntityService seriesService;
 
-    @Inject
-    @ru.smith.annotations.EntityService(Entities.PUBLISHER)
-    private EntityService publisherService;
-
-    public List<String> completeSerie(Publisher publisher, String nameSerie) {
-        String nameSerieLowerCase = nameSerie.toLowerCase();
-        List<Series> series = publisher.getSeries();
-        return series.stream().filter(s -> s.getName().toLowerCase().contains(nameSerieLowerCase))
+    public List<String> completeSerie(String query) {
+        Publisher publisher = (Publisher)UIComponent.
+                getCurrentComponent(FacesContext.getCurrentInstance()).getAttributes().get("publisher");
+        return ((List<Series>)seriesService.findWithCondition("publisher_id = " + publisher.getId())).
+                stream().filter(s -> s.getName().toLowerCase().contains(query.toLowerCase()))
                 .map(Series::getName).collect(Collectors.toList());
     }
 
-    public void onBlur(Publisher publisher) {
-        List<Series> series = publisher.getSeries().stream()
-                .filter(series1 -> series1.getName().equals(nameSerie)).collect(Collectors.toList());
+    public Series onBlur(Publisher publisher) {
+        if (publisher == null) return null;
+        List<Series> series = ((List<Series>)seriesService.findWithCondition("publisher_id = " + publisher.getId())).stream()
+                .filter(s -> s.getName().equals(nameSerie)).collect(Collectors.toList());
         if (!series.isEmpty()) {
             setSerie(series.get(0));
         } else {
+            if (nameSerie != null && !nameSerie.equals(""))
             PrimeFaces.current().executeScript("PF('dlgAddSerie').show()");
         }
+        return serie;
     }
 
-    public void add(Publisher publisher){
+    public Series add(Publisher publisher) {
         serie = new Series();
         serie.setName(nameSerie);
         serie.setPublisher(publisher);
         seriesService.saveEntity(serie);
+        return serie;
     }
 }

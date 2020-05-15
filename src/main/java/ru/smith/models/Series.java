@@ -25,7 +25,7 @@ public class Series implements Entity{
     @Getter @Setter
     private Publisher publisher;
 
-    @OneToMany(mappedBy = "series", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "series", cascade = CascadeType.ALL, orphanRemoval = true)
     @Getter @Setter
     private List<Book> books;
 

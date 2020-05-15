@@ -20,6 +20,11 @@
             PF('dlgAddSerie').hide();
         }
     </script>
+    <script type="text/javascript">
+        function handleCompleteStory(xhr, status, args) {
+            PF('dlgAddStory').hide();
+        }
+    </script>
 </h:head>
 <style type="text/css">
     .body {
@@ -62,7 +67,7 @@
         <h:form id="addBook">
             <p:growl id="msgs" showDetail="true" skipDetailIfEqualsSummary="true"/>
 
-            <h:panelGrid columns="2" styleClass="panelGrid" cellpadding="6" columnClasses="colLeft, colRight">
+            <h:panelGrid columns="2" styleClass="panelGrid" cellpadding="5" columnClasses="colLeft, colRight">
                 <h:outputText value="#{msgs.book_title}"/>
                 <p:inputText value="#{addBook.bookTitle}" required="true"
                              requiredMessage="#{msgs.empty_field_book_title}"/>
@@ -74,22 +79,28 @@
                              requiredMessage="#{msgs.empty_field_book_year_publishing}"/>
                 <h:outputText value="#{msgs.book_publisher}"/>
                 <p:autoComplete id="acPublisher" value="#{addPublisher.namePublisher}" required="true"
+                                minQueryLength="2" queryDelay="300"
                                 requiredMessage="#{msgs.empty_field_book_publisher}"
                                 completeMethod="#{addPublisher.completePublisher}">
-                    <p:ajax event="blur" listener="#{addPublisher.onBlur}" update="dialogAddPublisher"/>
+                    <p:ajax event="blur" listener="#{addBook.addPublisherForBook(addPublisher.onBlur())}" update="dialogAddPublisher"/>
+                </p:autoComplete>
+                <h:outputText value="#{msgs.book_serie}"/>
+                <p:autoComplete id="acSerie" value="#{addSerie.nameSerie}"
+                                queryDelay="300" minQueryLength="2"
+                                completeMethod="#{addSerie.completeSerie}">
+                    <f:attribute name="publisher" value="#{addPublisher.publisher}"/>
+                    <p:ajax event="blur" listener="#{addBook.addSerieForBook(addSerie.onBlur(addBook.publisher))}" update="dialogAddSerie"/>
                 </p:autoComplete>
                 <h:outputText value="#{msgs.book_stories}:"/>
-                <p:commandButton id="addStorieBtn" value="#{msgs.btn_add_storie}" action="PF('dlgAddStorie').show()"/>
-                <h:outputText value="#{msgs.book_series}"/>
-                <p:autoComplete id="acSerie" value="#{addSerie.nameSerie}" required="true"
-                                requiredMessage="#{msgs.empty_field_book_serie}"
-                                completeMethod="#{addSerie.completeSerie(addPublisher.publisher, addSerie.nameSerie)}">
-                    <p:ajax event="blur" listener="#{addSerie.onBlur(addPublisher.publisher)}" update="dialogAddSerie"/>
-                </p:autoComplete>
-                <h:outputText/>
+                <h:panelGrid id="storiesPanel" columns="1" styleClass="panelGrid">
+                    <h:outputText rendered="#{not empty addBook.storyInBook}" value="#{addBook.getAllStoryForBook()}"/>
+                    <br/>
+                    <p:commandButton id="addStorieBtn" value="#{msgs.btn_add_story}"
+                                     oncomplete="PF('dlgAddStory').show()" update="storiesPanel">
+                    </p:commandButton>
+                </h:panelGrid>
                 <p:commandButton id="addBookBtn" value="#{msgs.btn_add_book}" action="#{addBook.addBook}"
                                  update="addBook"/>
-                <h:outputText/>
                 <h:form id="cancel">
                     <h:outputText/>
                     <p:linkButton id="cancelBtn" value="#{msgs.btn_cancel}" outcome="/library?faces-redirect=true"/>
@@ -113,7 +124,7 @@
 
                 <h:outputText/>
                 <p:commandButton id="addPublisherBtn" value="#{msgs.btn_add_publisher}"
-                                 action="#{addPublisher.add}" update="msgsAddPublisher"
+                                 action="#{addBook.addPublisherForBook(addPublisher.add())}" update="msgsAddPublisher"
                                  oncomplete="handleCompletePublisher(xhr, status, args)"/>
                 <h:outputText/>
                 <h:form id="cancelAddPublisher">
@@ -124,20 +135,19 @@
             </h:panelGrid>
         </h:form>
     </p:dialog>
-
     <p:dialog id="dialogAddSerie" header="#{msgs.dlg_add_serie}" widgetVar="dlgAddSerie"
               styleClass="panelBook" dynamic="true"
               resizable="false" modal="true" closable="false">
         <h:form id="addSerie">
             <p:growl id="msgsAddSerie" showDetail="true" skipDetailIfEqualsSummary="true"/>
             <h:panelGrid columns="2" styleClass="panelGrid" cellpadding="5" columnClasses="colLeft, colRight">
-                <h:outputText value="#{msgs.book_series}"/>
+                <h:outputText value="#{msgs.book_serie}"/>
                 <p:inputText value="#{addSerie.nameSerie}" required="true"
                              requiredMessage="#{msgs.empty_field_book_serie}"/>
 
                 <h:outputText/>
                 <p:commandButton id="addSerieBtn" value="#{msgs.btn_add_serie}"
-                                 action="#{addSerie.add(addPublisher.publisher)}" update="msgsAddSerie"
+                                 action="#{addBook.addSerieForBook(addSerie.add(addPublisher.publisher))}" update="msgsAddSerie"
                                  oncomplete="handleCompleteSeries(xhr, status, args)"/>
                 <h:outputText/>
                 <h:form id="cancelAddSerie">
@@ -148,9 +158,57 @@
             </h:panelGrid>
         </h:form>
     </p:dialog>
-    <p:dialog id="dialogAddStorie" header="#{msgs.dlg_add_serie}" widgetVar="dlgAddStorie"
+    <p:dialog id="dialogAddStory" header="#{msgs.dlg_add_story}" widgetVar="dlgAddStory"
               styleClass="panelBook" dynamic="true"
-              resizable="false" modal="true" closable="true">
+              resizable="false" modal="true" closable="false">
+        <h:form id="addStory">
+            <p:growl id="msgsAddStory" showDetail="true" skipDetailIfEqualsSummary="true"/>
+            <h:panelGrid id="panelAddStory" columns="2" styleClass="panelGrid" cellpadding="5"
+                         columnClasses="colLeft, colRight">
+                <h:outputText value="#{msgs.story_name}"/>
+                <p:autoComplete id="acStoryName" value="#{addStory.nameStory}"
+                                queryDelay="300" minQueryLength="2"
+                                required="true" requiredMessage="#{msgs.empty_field_story_name}"
+                                completeMethod="#{addStory.completeStoryName}">
+                    <f:ajax/>
+                </p:autoComplete>
+                <h:outputText value="#{msgs.story_author_last_name}"/>
+                <p:autoComplete id="acStoryLastName" value="#{addStory.lastName}"
+                                queryDelay="300" minQueryLength="2"
+                                required="true" requiredMessage="#{msgs.empty_field_story_author_last_name}"
+                                completeMethod="#{addStory.completeLastName}">
+                    <f:ajax/>
+                </p:autoComplete>
+                <h:outputText value="#{msgs.story_author_first_name}"/>
+                <p:autoComplete id="acStoryFirstName" value="#{addStory.firstName}"
+                                queryDelay="300" minQueryLength="2"
+                                completeMethod="#{addStory.completeFirstName}">
+                    <f:ajax/>
+                </p:autoComplete>
+                <h:outputText value="#{msgs.story_author_middle_name}"/>
+                <p:autoComplete id="acStoryMiddleName" value="#{addStory.middleName}"
+                                queryDelay="300" minQueryLength="2"
+                                completeMethod="#{addStory.completeMiddleName}">
+                    <f:ajax/>
+                </p:autoComplete>
+                <h:outputText rendered="#{not empty addStory.authorsStory}" value="#{msgs.story_authors}"/>
+                <h:outputText rendered="#{not empty addStory.authorsStory}"
+                              value="#{addStory.getAllAuthorsForStory()}"/>
+                <p:commandButton id="addAnotherAuthorBtn" value="#{msgs.btn_add_another_author}"
+                                 action="#{addStory.addAnotherAuthor}" update="msgsAddStory, panelAddStory"/>
+                <p:commandButton id="saveStoryBtn" value="#{msgs.btn_save_story}"
+                                 action="#{addBook.addStoryToList(addStory.getStory())}"
+                                 update="msgsAddStory, panelAddStory"
+                                 oncomplete="handleCompleteStory(xhr, status, args)"/>
+                <h:outputText/>
+                <h:form id="cancelAddStory">
+                    <h:outputText/>
+                    <p:linkButton id="cancelBtnAddStory" value="#{msgs.btn_cancel}"
+                                  oncomplete="handleCompleteStory(xhr, status, args)"/>
+                </h:form>
+            </h:panelGrid>
+        </h:form>
+        <p:ajax event="close" update=":addBook"/>
     </p:dialog>
 </h:body>
 </html>
