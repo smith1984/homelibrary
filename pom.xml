@@ -11,7 +11,7 @@
     <properties>
         <jdk.version>13</jdk.version>
         <postgresql.version>42.2.8</postgresql.version>
-        <hibernate.version>5.4.4.Final</hibernate.version>
+        <hibernate.version>5.4.24.Final</hibernate.version>
         <log4j.version>1.2.17</log4j.version>
         <lombok.version>1.18.10</lombok.version>
         <jee.cdi-api.version>2.0</jee.cdi-api.version>
